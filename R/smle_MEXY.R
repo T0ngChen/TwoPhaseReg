@@ -199,7 +199,6 @@ smle_MEXY <- function (Y_unval=NULL, Y=NULL, X_unval=NULL, X=NULL, Z=NULL, Bspli
 #' @param Bspline Specifies the columns of the B-spline basis. Subjects with missing values of \code{Bspline} are omitted from the analysis. This argument is required.
 #' @param Z Specifies the columns of the accurately measured covariates. Subjects with missing values of \code{Z} are omitted from the analysis. This argument is optional.
 #' @param data Specifies the name of the dataset. This argument is required.
-#' @param nfolds Specifies the number of cross-validation folds. The default value is \code{5}. Although \code{nfolds} can be as large as the sample size (leave-one-out cross-validation), it is not recommended for large datasets. The smallest value allowable is \code{3}.
 #' @param MAX_ITER Specifies the maximum number of iterations in the EM algorithm. The default number is \code{2000}. This argument is optional.
 #' @param TOL Specifies the convergence criterion in the EM algorithm. The default value is \code{1E-4}. This argument is optional.
 #' @param verbose If \code{TRUE}, then show details of the analysis. The default value is \code{FALSE}.
@@ -211,13 +210,12 @@ smle_MEXY <- function (Y_unval=NULL, Y=NULL, X_unval=NULL, X=NULL, Z=NULL, Bspli
 #' @importFrom Rcpp evalCpp
 #' @importFrom stats pchisq
 #' @exportPattern "^[[:alpha:]]+"
-cv_smle_MEXY <- function (Y_unval=NULL, Y=NULL, X_unval=NULL, X=NULL, Z=NULL, Bspline=NULL, data=NULL, nfolds=5, MAX_ITER=2000, TOL=1E-4, verbose=FALSE) {
+cv_smle_MEXY <- function (Y_unval=NULL, Y=NULL, X_unval=NULL, X=NULL, Z=NULL, Bspline=NULL, data=NULL, MAX_ITER=2000, TOL=1E-4, verbose=FALSE) {
 
   ###############################################################################################################
   #### check data ###############################################################################################
   storage.mode(MAX_ITER) = "integer"
   storage.mode(TOL) = "double"
-  storage.mode(nfolds) = "integer"
 
   if (is.null(data)) {
     stop("No dataset is provided!")
@@ -283,13 +281,7 @@ cv_smle_MEXY <- function (Y_unval=NULL, Y=NULL, X_unval=NULL, X=NULL, Z=NULL, Bs
     print(paste("There are", n-length(id_phase1), "observations validated in the second phase."))
   }
 
-  if (nfolds >= 3) {
-    if (verbose) {
-      print(paste0(nfolds, "-folds cross-validation will be performed."))
-    }
-  } else {
-    stop("nfolds needs to be greater than or equal to 3!")
-  }
+
   #### check data ###############################################################################################
   ###############################################################################################################
 
@@ -323,8 +315,7 @@ cv_smle_MEXY <- function (Y_unval=NULL, Y=NULL, X_unval=NULL, X=NULL, Z=NULL, Bs
     Z_mat = cbind(1, Z_mat)
   }
   
-  idx_fold = c(sample(1:nfolds, size = length(Y_vec), replace = TRUE),
-               sample(1:nfolds, size = length(id_phase1), replace = TRUE))
+  
   #### prepare analysis #########################################################################################
   ###############################################################################################################
 
@@ -332,17 +323,17 @@ cv_smle_MEXY <- function (Y_unval=NULL, Y=NULL, X_unval=NULL, X=NULL, Z=NULL, Bs
 
   ###############################################################################################################
   #### analysis #################################################################################################
-  pred_loglik = rep(NA, nfolds)
-  converge = rep(NA, nfolds)
-  for (fold in 1:nfolds) {
-    Train = as.numeric(idx_fold != fold)
-    res = .Call("TwoPhase_MLE0_MEXY_CV_loglik", Y_unval_vec, X_unval_mat, Y_vec, X_mat, Z_mat, Bspline_mat, MAX_ITER, TOL, Train, package = "TwoPhaseReg")
-    pred_loglik[fold] = res$pred_loglike
-    converge[fold] = !res$flag_nonconvergence
-    if (pred_loglik[fold] == -999.) {
-      pred_loglik[fold] = NA
-    }
+  pred_loglik = NA
+  converge = NA
+  
+  Train = rep(1, length(id_phase1))
+  res = .Call("TwoPhase_MLE0_MEXY_CV_loglik", Y_unval_vec, X_unval_mat, Y_vec, X_mat, Z_mat, Bspline_mat, MAX_ITER, TOL, Train, package = "TwoPhaseReg")
+  pred_loglik[fold] = res$pred_loglike
+  converge[fold] = !res$flag_nonconvergence
+  if (pred_loglik[fold] == -999.) {
+    pred_loglik[fold] = NA
   }
+
 
   #### analysis #################################################################################################
   ###############################################################################################################

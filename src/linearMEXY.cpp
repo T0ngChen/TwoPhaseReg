@@ -961,9 +961,9 @@ RcppExport SEXP TwoPhase_MLE0_MEXY_CV_loglik (SEXP Y_tilde_R, SEXP X_tilde_R, SE
 	{
 		VectorXd resi_n(n2);
 		MatrixXd logp(m, s);
-		VectorXd Test = (1.-Train.array()).matrix();
+		VectorXd Test = Train.array().matrix();
 		MatrixXd TestDiag = Test.asDiagonal();
-		const int n_test = n-n_train;
+		const int n_test = n_train;
 		
 		/**** calculate the likelihood *************************************************************************************************************/
 		double tmp;
