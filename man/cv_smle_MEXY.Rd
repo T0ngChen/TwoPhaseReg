@@ -12,7 +12,6 @@ cv_smle_MEXY(
   Z = NULL,
   Bspline = NULL,
   data = NULL,
-  nfolds = 5,
   MAX_ITER = 2000,
   TOL = 1e-04,
   verbose = FALSE
@@ -32,8 +31,6 @@ cv_smle_MEXY(
 \item{Bspline}{Specifies the columns of the B-spline basis. Subjects with missing values of \code{Bspline} are omitted from the analysis. This argument is required.}
 
 \item{data}{Specifies the name of the dataset. This argument is required.}
-
-\item{nfolds}{Specifies the number of cross-validation folds. The default value is \code{5}. Although \code{nfolds} can be as large as the sample size (leave-one-out cross-validation), it is not recommended for large datasets. The smallest value allowable is \code{3}.}
 
 \item{MAX_ITER}{Specifies the maximum number of iterations in the EM algorithm. The default number is \code{2000}. This argument is optional.}
 

@@ -328,10 +328,10 @@ cv_smle_MEXY <- function (Y_unval=NULL, Y=NULL, X_unval=NULL, X=NULL, Z=NULL, Bs
   
   Train = rep(1, length(id_phase1))
   res = .Call("TwoPhase_MLE0_MEXY_CV_loglik", Y_unval_vec, X_unval_mat, Y_vec, X_mat, Z_mat, Bspline_mat, MAX_ITER, TOL, Train, package = "TwoPhaseReg")
-  pred_loglik[fold] = res$pred_loglike
-  converge[fold] = !res$flag_nonconvergence
-  if (pred_loglik[fold] == -999.) {
-    pred_loglik[fold] = NA
+  pred_loglik = res$pred_loglike
+  converge = !res$flag_nonconvergence
+  if (pred_loglik == -999.) {
+    pred_loglik = NA
   }
 
 
